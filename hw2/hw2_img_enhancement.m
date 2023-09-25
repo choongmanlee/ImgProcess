@@ -1,6 +1,7 @@
 % Image Signal Processing
 % Title: HW #2 Image Enhancement
 % Date: 2023.09.20
+% Revised Date: 2023.09.24
 % Author: choongman.lee
 
 LPF_TYPE=1;     % 0: Box Filter, 1: Gaussian Filter
@@ -9,9 +10,10 @@ alpha=3;        % for enhancement
 
 PADARR=true;    % true: use padarray function
 
-img=imread('squirrel.jpg');
-%img=imread('bird_img.png');
+img=imread('tiger.jpg');
+%img=imread('squirrel.jpg');
 %img=imread('pizza.jpg');
+gray_img = rgb2gray(img);
 [A,B,C]=size(img);
 img=double(img)/255;
 Ri=zeros(A,B);
@@ -26,9 +28,9 @@ for a=1:A
     end
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% L x L Gaussian or Box Filter %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Low Pass Filter | L x L Gaussian or Box Filter %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 lpf=ones(L,L);
 M=(L+1)/2;
 
@@ -45,13 +47,22 @@ else            % Box Filter
     lpf=1/L^2*lpf;
 end
 
-%surf(lpf)              % time domain
-%[F,w1,w2]=freqz2(lpf);
-%surf(w1,w2,abs(F))     % frequency domain
+gray_img=double(gray_img)/255;
+Glpf=conv2(gray_img,lpf,'same');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Edge Detector | edge=X-LPF(X) %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+imwrite(gray_img,'gray_img.jpg');
+imwrite(Glpf,'lpf_gray_img.jpg');
+
+%subplot(1,2,1), imshow(gray_img), title('Gray Image')
+%subplot(1,2,2), imshow(Glpf), title('Low-Pass Filtering Gray Image')
+
+%[F,w1,w2]=freqz2(lpf);
+%subplot(1,2,1), surf(lpf), title('Time domain')
+%subplot(1,2,2), surf(w1,w2,abs(F)), title('Frequency domain')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edge Detector = High Pass Filter | edge=X-LPF(X) %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 x=zeros(L,L);
 x(M,M)=1;
 
@@ -109,8 +120,10 @@ enhance_img(:,:,1)=Yr;
 enhance_img(:,:,2)=Yg;
 enhance_img(:,:,3)=Yb;
 
-imshow(enhance_img)
 imwrite(enhance_img,'enhance_img.jpg');
+
+subplot(1,2,1), imshow(img), title('Original Image')
+subplot(1,2,2), imshow(enhance_img), title('Enhanced Image')
 
 %surf(y)            % time domain
 %[Y,w1,w2]=freqz2(y);
